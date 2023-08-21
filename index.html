@@ -1,0 +1,75 @@
+<form action="set.php" method="post" autocomplete="off" id="my-form">
+    <p id="status-text" style="text-align:center;">yay it did a thing</p>
+    <label for="name">Your Server name</label>
+    <input id="name" type="name" name="name" placeholder="examplemc" required/>
+    <p id="name-error-text"></p>
+    <label for="domain">Domain</label>
+    <select id="domain" type="text" name="domain" placeholder="select" required>
+                    <option value="select">Select Domain</option>
+                  </select>
+
+    <label for="email">Your Email</label>
+    <input id="email" type="email" name="email" placeholder="example@email.com" required/>
+    <p id="email-error-text"></p>
+    <label for="serverurl">Server URL</label>
+    <input id="serverurl" type="text" name="serverurl" placeholder="https://cp.snakecrafthosting.com/server/00xx00x0" required/>
+    <p id="serverurl-error-text"></p>
+    <button type="submit" name="button">Create</button>
+</form>
+
+
+<script>
+    function inputError(name, error) {
+        var input = document.getElementById(name);
+        var errorTxt = document.getElementById(name + '-error-text');
+        if (name == "domain") errorTxt = document.getElementById('name-error-text');
+
+        if (error != null && error != "none") {
+            input.style.border = "1px solid red";
+            errorTxt.style.color = "red";
+            errorTxt.innerText = error;
+        } else {
+            input.style.border = "1px solid rgba(0, 0, 0, 0.1";
+            errorTxt.innerText = "";
+        }
+    }
+    //inputError("domain","name must be a-z 1-9 and -")
+
+    let select = document.getElementById("domain");
+
+    fetch('/getdomains.php')
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(domain => {
+                let option = document.createElement("option");
+                option.text = domain;
+                option.value = domain;
+                select.add(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+
+    let form = document.getElementById("my-form");
+    let statusText = document.getElementById("status-text");
+
+    form.addEventListener("submit", function(event) {
+        event.preventDefault(); // prevent form submission
+
+        let formData = new FormData(form); // get form data
+
+        fetch("/set.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                statusText.innerText = data.message; // set status text to message property of response
+                if (data.error) statusText.innerText = data.error;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    });
+</script>
